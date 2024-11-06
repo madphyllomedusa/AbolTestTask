@@ -34,5 +34,6 @@ build/
 .mvn
 mvnw.cmd
 mvnw
+.gitattributes
 
-/src/main/test/
+/src/test/
