@@ -1,8 +1,12 @@
 package ru.test.core.model.mappers;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ru.test.core.model.dto.UserDto;
 import ru.test.core.model.entity.User;
+
+import java.util.Collections;
 
 @Component
 public class UserMapper {
@@ -25,5 +29,13 @@ public class UserMapper {
         user.setPassword(userDto.getPassword());
         user.setRole(userDto.getRole());
         return user;
+    }
+
+    public UserDetails toUserDetails(User user) {
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail().toLowerCase(),
+                user.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
     }
 }

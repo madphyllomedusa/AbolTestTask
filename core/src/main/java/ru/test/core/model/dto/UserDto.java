@@ -8,7 +8,6 @@ import ru.test.core.model.enums.Role;
 import java.util.List;
 
 @Data
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
