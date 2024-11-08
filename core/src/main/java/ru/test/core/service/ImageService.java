@@ -1,9 +1,7 @@
 package ru.test.core.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 import ru.test.core.model.dto.ImageResponse;
-import ru.test.core.model.dto.UserDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

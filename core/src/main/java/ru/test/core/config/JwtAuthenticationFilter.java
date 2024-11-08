@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            userId = jwtService.extractUserId(jwt); // Извлекаем userId из JWT
+            userId = jwtService.extractUserId(jwt);
             logger.info("Extracted User ID from JWT: {}", userId);
         }
 
