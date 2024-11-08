@@ -23,11 +23,11 @@ public class AuthController {
         UserDto register = authService.register(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(register);
     }
+
     @PostMapping("/login")
     public ResponseEntity<JwtAuthenticationResponse> login(@RequestBody SignInRequest signInRequest) {
         JwtAuthenticationResponse jwtResponse = authService.login(signInRequest);
         return ResponseEntity.status(HttpStatus.OK).body(jwtResponse);
-
     }
 
 }

@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
         }
         User user = userMapper.toEntity(userDto);
         User savedUser = userRepository.save(user);
-        logger.info("Saved user {}", savedUser);
+        logger.info("Saved user {}", userDto);
         return userMapper.toDto(savedUser);
     }
 
@@ -87,8 +87,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Неверный пароль");
         }
 
-        UserDetails userDetails = userMapper.toUserDetails(user);
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(user);
         logger.info("Generated token: {}", token);
         logger.info("User {} successfully logged in", optionalUser.get().getUsername());
         return new JwtAuthenticationResponse(token);

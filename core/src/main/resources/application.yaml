@@ -1,14 +1,6 @@
 spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: Ov23liecJqzGsHcz0MUn
-            client-secret: 5c3ada9369c832d6e76aae66ba04469c40fc7dd4
-            redirect-uri: http://localhost:8080/auth/login/oauth2/code/github
-
-
+  servlet:
+    multipart:enabled=true
 
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres

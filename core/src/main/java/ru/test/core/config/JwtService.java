@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.test.core.model.entity.User;
 
 @Service
 public class JwtService {
@@ -30,15 +31,23 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = parseClaims(token);
         return claimsResolver.apply(claims);
     }
 
 
-    public String generateToken(UserDetails userDetails) {
-        return createToken(new HashMap<>(), userDetails.getUsername());
+    public String generateToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId()); // Добавляем userId в claims
+        return createToken(claims, user.getEmail());
     }
+
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
