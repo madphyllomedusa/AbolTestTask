@@ -18,6 +18,7 @@ public class UserMapper {
         userDto.setEmail(user.getEmail().toLowerCase());
         userDto.setPassword(user.getPassword());
         userDto.setRole(user.getRole());
+        userDto.setBlock(user.getBlocked());
         return userDto;
     }
 
@@ -28,6 +29,7 @@ public class UserMapper {
         user.setEmail(userDto.getEmail().toLowerCase());
         user.setPassword(userDto.getPassword());
         user.setRole(userDto.getRole());
+        user.setBlocked(userDto.getBlock());
         return user;
     }
 
@@ -35,7 +37,9 @@ public class UserMapper {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail().toLowerCase(),
                 user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                Collections.singletonList(
+                        new SimpleGrantedAuthority("ROLE_" + user.getRole()
+                                                                        .name()))
         );
     }
 }

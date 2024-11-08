@@ -9,6 +9,8 @@ import ru.test.core.model.mappers.UserMapper;
 import ru.test.core.repository.UserRepository;
 import ru.test.core.service.UserService;
 
+import java.time.OffsetDateTime;
+
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -16,6 +18,21 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    @Override
+    public void blockUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setBlocked(OffsetDateTime.now());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void unblockUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setBlocked(null);
+        userRepository.save(user);
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -27,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(), user.getPassword(), user.getAuthorities());
     }

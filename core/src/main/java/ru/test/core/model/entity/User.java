@@ -17,6 +17,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.test.core.model.enums.Role;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +47,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Column(name = "blocked_at")
+    private OffsetDateTime blocked;
+
     @ElementCollection
     @CollectionTable(name = "user_images", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "image_url")
@@ -73,7 +77,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return blocked == null;
     }
 
     @Override

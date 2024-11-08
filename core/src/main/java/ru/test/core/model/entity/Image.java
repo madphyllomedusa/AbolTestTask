@@ -29,7 +29,7 @@ public class Image {
 
     private String fileName;
 
-    private long size;
+    private Long size;
 
     private OffsetDateTime uploadDate;
 

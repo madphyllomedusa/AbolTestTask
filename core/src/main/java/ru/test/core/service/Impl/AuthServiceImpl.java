@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
         if (userDto.getRole() == null) {
-            userDto.setRole(Role.USER);
+            userDto.setRole(Role.ROLE_USER);
         }
 
         if (userDto.getUsername() == null

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.test.core.model.enums.Role;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -17,6 +18,7 @@ public class UserDto {
     private String password;
     private String matchingPassword;
     private Role role;
+    private OffsetDateTime block;
     private List<String> imageUrls;
 
     @Override

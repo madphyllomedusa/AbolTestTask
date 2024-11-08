@@ -4,19 +4,20 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import ru.test.core.exceptionhandler.BadRequestException;
 import ru.test.core.model.dto.ImageResponse;
 import ru.test.core.model.entity.Image;
 import ru.test.core.model.entity.User;
 import ru.test.core.model.mappers.ImageMapper;
-import ru.test.core.model.mappers.UserMapper;
 import ru.test.core.repository.ImageRepository;
 import ru.test.core.repository.UserRepository;
 import ru.test.core.service.CloudinaryService;
 import ru.test.core.service.ImageService;
+import ru.test.core.specification.ImageSpecification;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -49,16 +50,14 @@ public class ImageServiceImpl implements ImageService {
                 });
 
         for (MultipartFile file : files) {
-            // Проверка размера файла
             if (file.getSize() > MAX_FILE_SIZE) {
                 logger.error("File size exceeds the maximum limit for file: {}", file.getOriginalFilename());
-                throw new IllegalArgumentException("File size exceeds the maximum limit of 10MB for file: " + file.getOriginalFilename());
+                throw new BadRequestException("File size exceeds the maximum limit of 10MB for file: " + file.getOriginalFilename());
             }
 
-            // Проверка типа файла
             if (!ALLOWED_FILE_TYPES.contains(file.getContentType())) {
                 logger.error("Unsupported file type for file: {}", file.getOriginalFilename());
-                throw new IllegalArgumentException("Unsupported file type for file: " + file.getOriginalFilename() + ". Only JPEG and PNG images are allowed.");
+                throw new BadRequestException("Unsupported file type for file: " + file.getOriginalFilename() + ". Only JPEG and PNG images are allowed.");
             }
 
             logger.info("Uploading image for user with ID: {}, file: {}", userId, file.getOriginalFilename());
@@ -97,33 +96,32 @@ public class ImageServiceImpl implements ImageService {
         return imageMapper.toDto(image);
     }
 
-
     @Override
-    public List<ImageResponse> getUserImages(Long userId, String sortBy, String filterBy) {
-        logger.info("Fetching images for user ID: {}, sortBy: {}, filterBy: {}", userId, sortBy, filterBy);
+    public List<ImageResponse> getFilteredImages(Long userId,
+                                                 String sortBy,
+                                                 String sortDirection,
+                                                 Long minSize, Long maxSize,
+                                                 OffsetDateTime startDate,
+                                                 OffsetDateTime endDate) {
+        logger.info("Fetching images with filters - User ID: {}," +
+                        " Sort By: {}," +
+                        " Sort Direction: {}," +
+                        " Min Size: {}," +
+                        " Max Size: {}," +
+                        " Start Date: {}," +
+                        " End Date: {}",
+                userId, sortBy, sortDirection, minSize, maxSize, startDate, endDate);
 
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            logger.error("User not found with ID: {}", userId);
-            throw new IllegalArgumentException("User not found");
-        }
+        Specification<Image> spec = Specification.where(userId != null ? ImageSpecification.hasUserId(userId) : null)
+                .and(ImageSpecification.hasMinSize(minSize))
+                .and(ImageSpecification.hasMaxSize(maxSize))
+                .and(ImageSpecification.hasStartDate(startDate))
+                .and(ImageSpecification.hasEndDate(endDate));
 
-        List<Image> images;
-        if (filterBy == null || filterBy.isEmpty()) {
-            images = imageRepository.findByUser(user);
-        } else {
-            switch (filterBy) {
-                case "size":
-                    images = imageRepository.findByUserOrderBySize(user);
-                    break;
-                case "uploadDate":
-                    images = imageRepository.findByUserOrderByUploadDate(user);
-                    break;
-                default:
-                    images = imageRepository.findByUser(user);
-                    break;
-            }
-        }
+        Sort sort = Sort.by(
+                Sort.Direction.fromString(sortDirection != null ? sortDirection : "ASC"),
+                sortBy != null ? sortBy : "id");
+        List<Image> images = imageRepository.findAll(spec, sort);
 
         return images.stream()
                 .map(imageMapper::toDto)

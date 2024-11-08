@@ -10,9 +10,10 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageResponse {
+    private Long userId;
     private Long id;
     private String fileName;
-    private long size;
+    private Long size;
     private OffsetDateTime uploadDate;
     private String url;
 }

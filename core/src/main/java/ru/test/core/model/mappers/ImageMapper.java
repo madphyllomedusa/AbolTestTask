@@ -9,31 +9,15 @@ import ru.test.core.model.entity.Image;
 public class ImageMapper {
 
     public ImageResponse toDto(Image image) {
-        if (image == null) {
-            return null;
-        }
+      ImageResponse imageResponse = new ImageResponse();
+      imageResponse.setId(image.getId());
+      imageResponse.setFileName(image.getFileName());
+      imageResponse.setSize(image.getSize());
+      imageResponse.setUploadDate(image.getUploadDate());
+      imageResponse.setUrl(image.getUrl());
+      imageResponse.setUserId(image.getUser().getId());
+      return imageResponse;
 
-        return new ImageResponse(
-                image.getId(),
-                image.getFileName(),
-                image.getSize(),
-                image.getUploadDate(),
-                image.getUrl()
-        );
     }
 
-    public Image toEntity(ImageResponse imageResponse) {
-        if (imageResponse == null) {
-            return null;
-        }
-
-        Image image = new Image();
-        image.setId(imageResponse.getId());
-        image.setFileName(imageResponse.getFileName());
-        image.setSize(imageResponse.getSize());
-        image.setUploadDate(imageResponse.getUploadDate());
-        image.setUrl(imageResponse.getUrl());
-
-        return image;
-    }
 }
