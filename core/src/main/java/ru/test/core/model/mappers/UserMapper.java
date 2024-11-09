@@ -3,6 +3,7 @@ package ru.test.core.model.mappers;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import ru.test.core.model.dto.SignUpRequest;
 import ru.test.core.model.dto.UserDto;
 import ru.test.core.model.entity.User;
 
@@ -16,20 +17,17 @@ public class UserMapper {
         userDto.setId(user.getId());
         userDto.setUsername(user.getUsername().toLowerCase());
         userDto.setEmail(user.getEmail().toLowerCase());
-        userDto.setPassword(user.getPassword());
         userDto.setRole(user.getRole());
-        userDto.setBlock(user.getBlocked());
+        userDto.setBlockedAt(user.getBlockedAt());
         return userDto;
     }
 
-    public User toEntity(UserDto userDto) {
+    public User toEntity(SignUpRequest signUpRequest) {
         User user = new User();
-        user.setId(userDto.getId());
-        user.setUsername(userDto.getUsername().toLowerCase());
-        user.setEmail(userDto.getEmail().toLowerCase());
-        user.setPassword(userDto.getPassword());
-        user.setRole(userDto.getRole());
-        user.setBlocked(userDto.getBlock());
+        user.setUsername(signUpRequest.getUsername().toLowerCase());
+        user.setEmail(signUpRequest.getEmail().toLowerCase());
+        user.setPassword(signUpRequest.getPassword());
+        user.setRole(signUpRequest.getRole());
         return user;
     }
 

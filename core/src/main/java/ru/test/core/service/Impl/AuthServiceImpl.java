@@ -1,6 +1,6 @@
 package ru.test.core.service.Impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,7 +11,7 @@ import ru.test.core.exceptionhandler.BadRequestException;
 import ru.test.core.exceptionhandler.NotFoundException;
 import ru.test.core.model.dto.JwtAuthenticationResponse;
 import ru.test.core.model.dto.SignInRequest;
-import ru.test.core.model.dto.UserDto;
+import ru.test.core.model.dto.SignUpRequest;
 import ru.test.core.model.entity.User;
 import ru.test.core.model.enums.Role;
 import ru.test.core.model.mappers.UserMapper;
@@ -21,7 +21,7 @@ import ru.test.core.service.AuthService;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -32,49 +32,41 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserDto register(UserDto userDto) {
-        logger.info("Saving user {}", userDto);
-        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            logger.info("User already exists with email {}", userDto.getEmail());
-            throw new BadRequestException("Email уже используется");
+    public JwtAuthenticationResponse register(SignUpRequest signUpRequest) {
+        logger.info("Registering user with email {}", signUpRequest.getEmail());
+
+        if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
+            logger.info("User already exists with email {}", signUpRequest.getEmail());
+            throw new BadRequestException("Пользователь с этой почтой уже зарегистрирован");
         }
 
-        if (!userDto.getPassword().equals(userDto.getMatchingPassword())) {
+        if (!signUpRequest.getPassword().equals(signUpRequest.getMatchingPassword())) {
             throw new BadRequestException("Пароли не совпадают");
         }
 
-        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        if (userDto.getRole() == null) {
-            userDto.setRole(Role.ROLE_USER);
+        if (signUpRequest.getRole() == null) {
+            signUpRequest.setRole(Role.ROLE_USER);
         }
 
-        if (userDto.getUsername() == null
-                || userDto.getUsername().isEmpty()
-                || userDto.getEmail() == null
-                || userDto.getEmail().isEmpty()) {
-            logger.warn("Some user fields is empty or null {}", userDto);
-            throw new BadRequestException("Some user fields is empty or null");
 
-        }
-        User user = userMapper.toEntity(userDto);
+        User user = userMapper.toEntity(signUpRequest);
         User savedUser = userRepository.save(user);
-        logger.info("Saved user {}", userDto);
-        return userMapper.toDto(savedUser);
+        logger.info("User registered successfully: {}", savedUser.getUsername());
+
+        String token = jwtService.generateToken(savedUser);
+        return new JwtAuthenticationResponse(token);
     }
 
     @Override
-    @Transactional
     public JwtAuthenticationResponse login(SignInRequest signInRequest) {
         String identifier = signInRequest.getIdentifier().toLowerCase();
         String password = signInRequest.getPassword();
         logger.info("Attempting to login user with identifier {}", identifier);
 
-        Optional<User> optionalUser = userRepository.findByEmail(identifier);
-
-        if (optionalUser.isEmpty()) {
-            optionalUser = userRepository.findByUsername(identifier);
-        }
+        Optional<User> optionalUser = userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByUsername(identifier));
 
         if (optionalUser.isEmpty()) {
             throw new NotFoundException("Пользователь не найден с идентификатором: " + identifier);

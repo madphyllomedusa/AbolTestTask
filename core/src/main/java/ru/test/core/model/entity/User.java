@@ -11,7 +11,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
-import lombok.*;
+import jakarta.validation.constraints.Email;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,6 +42,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}")
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -48,7 +54,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(name = "blocked_at")
-    private OffsetDateTime blocked;
+    private OffsetDateTime blockedAt;
 
     @ElementCollection
     @CollectionTable(name = "user_images", joinColumns = @JoinColumn(name = "user_id"))
@@ -77,7 +83,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return blocked == null;
+        return blockedAt == null;
     }
 
     @Override

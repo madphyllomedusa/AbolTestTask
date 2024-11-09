@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ImageResponse {
     private Long userId;
     private Long id;

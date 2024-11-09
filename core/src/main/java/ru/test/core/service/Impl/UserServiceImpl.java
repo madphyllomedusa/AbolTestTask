@@ -1,6 +1,6 @@
 package ru.test.core.service.Impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import ru.test.core.service.UserService;
 import java.time.OffsetDateTime;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     public void blockUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        user.setBlocked(OffsetDateTime.now());
+        user.setBlockedAt(OffsetDateTime.now());
         userRepository.save(user);
     }
 
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     public void unblockUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        user.setBlocked(null);
+        user.setBlockedAt(null);
         userRepository.save(user);
     }
 
