@@ -15,10 +15,8 @@ public class UserDto {
     private Long id;
     private String username;
     private String email;
-    private String password;
-    private String matchingPassword;
     private Role role;
-    private OffsetDateTime block;
+    private OffsetDateTime blockedAt;
     private List<String> imageUrls;
 
     @Override
