@@ -10,6 +10,7 @@ import ru.test.core.config.JwtService;
 import ru.test.core.exceptionhandler.BadRequestException;
 import ru.test.core.exceptionhandler.NotFoundException;
 import ru.test.core.model.dto.JwtAuthenticationResponse;
+import ru.test.core.model.dto.MailMessageDto;
 import ru.test.core.model.dto.SignInRequest;
 import ru.test.core.model.dto.SignUpRequest;
 import ru.test.core.model.entity.User;
@@ -17,12 +18,15 @@ import ru.test.core.model.enums.Role;
 import ru.test.core.model.mappers.UserMapper;
 import ru.test.core.repository.UserRepository;
 import ru.test.core.service.AuthService;
+import ru.test.core.service.KafkaProducerService;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+
+    private final KafkaProducerService kafkaProducerService;
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -54,6 +58,12 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.toEntity(signUpRequest);
         User savedUser = userRepository.save(user);
         logger.info("User registered successfully: {}", savedUser.getUsername());
+
+        MailMessageDto message = new MailMessageDto();
+        message.setEmail(savedUser.getEmail());
+        message.setUsername(savedUser.getUsername());
+
+        kafkaProducerService.sendWelcomeEmail(message);
 
         String token = jwtService.generateToken(savedUser);
         return new JwtAuthenticationResponse(token);

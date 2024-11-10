@@ -2,6 +2,7 @@ package ru.test.core.service.Impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.test.core.exceptionhandler.BadRequestException;
 import ru.test.core.exceptionhandler.NotFoundException;
 import ru.test.core.model.dto.ImageResponse;
+import ru.test.core.model.dto.MailMessageDto;
 import ru.test.core.model.entity.Image;
 import ru.test.core.model.entity.User;
 import ru.test.core.model.mappers.ImageMapper;
@@ -18,6 +20,7 @@ import ru.test.core.repository.ImageRepository;
 import ru.test.core.repository.UserRepository;
 import ru.test.core.service.CloudinaryService;
 import ru.test.core.service.ImageService;
+import ru.test.core.service.KafkaProducerService;
 import ru.test.core.specification.ImageSpecification;
 
 import java.time.OffsetDateTime;
@@ -32,32 +35,43 @@ import java.util.stream.Collectors;
 public class ImageServiceImpl implements ImageService {
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
 
+    private final KafkaProducerService kafkaProducerService;
+
     private final CloudinaryService cloudinaryService;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
     private final ImageMapper imageMapper;
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
-    ;
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
     private static final List<String> ALLOWED_FILE_TYPES = List.of("image/jpeg", "image/png");
+
 
     @Override
     @Transactional
     public List<ImageResponse> uploadImages(List<MultipartFile> files, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new NotFoundException("Пользователя с таким ID не существует: " + userId));
 
+        long totalSize = files.stream().mapToLong(MultipartFile::getSize).sum();
 
         List<CompletableFuture<ImageResponse>> futures = files.stream()
-                .map(file -> CompletableFuture.supplyAsync(() ->
-                        uploadSingleImage(file, user), executorService))
+                .map(file -> CompletableFuture.supplyAsync(() -> uploadSingleImage(file, user), executorService))
                 .toList();
 
-        return futures.stream()
+        List<ImageResponse> responses = futures.stream()
                 .map(CompletableFuture::join)
                 .toList();
+
+        MailMessageDto message = new MailMessageDto();
+        message.setEmail(user.getEmail());
+        message.setUsername(user.getUsername());
+        message.setTotalSize(FileUtils.byteCountToDisplaySize(totalSize));
+
+        kafkaProducerService.sendImageUploadNotification(message);
+
+        return responses;
     }
 
 
@@ -73,6 +87,13 @@ public class ImageServiceImpl implements ImageService {
             logger.error("Access denied: Image does not belong to user with ID {}", userId);
             throw new SecurityException("Доступ запрещен: изображение принадлежит другому пользователю.");
         }
+
+        MailMessageDto message = new MailMessageDto();
+        message.setEmail(user.getEmail());
+        message.setFilename(image.getFileName());
+        message.setFileSize(FileUtils.byteCountToDisplaySize(image.getSize()));
+
+        kafkaProducerService.sendImageDownloadNotification(message);
 
         return imageMapper.toDto(image);
     }
