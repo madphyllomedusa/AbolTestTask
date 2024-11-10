@@ -16,14 +16,15 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendWelcomeEmail(String email, String username) {
+        logger.info("Try to send welcome email to {}" , email);
         String title = "Регистрация";
         String text = String.format("%s, спасибо что прошли регистрацию!", username);
-        logger.info("trying to send message on email");
         sendEmail(email, title, text);
     }
 
     @Override
     public void sendImageUploadNotification(String email, String username, String totalSize) {
+        logger.info("Try to send welcome email to {}" , email);
         String title = "Загрузка файлов";
         String text = String.format("Привет %s, вы успешно загрузили изображений на %s.", username, totalSize);
 
@@ -32,6 +33,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendImageDownloadNotification(String email, String filename, String fileSize) {
+        logger.info("Try to send welcome email to {}" , email);
         String title = "Скачивание файлов";
         String text = String.format("Вы успешно скачали: %s (размером: %s).", filename, fileSize);
 
