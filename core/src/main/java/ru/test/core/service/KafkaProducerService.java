@@ -1,24 +1,12 @@
 package ru.test.core.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
-import ru.test.core.model.dto.MailMessageDto;
 
-@Service
-@RequiredArgsConstructor
-public class KafkaProducerService {
-    private final KafkaTemplate<String, MailMessageDto> kafkaTemplate;
 
-    public void sendWelcomeEmail(MailMessageDto message) {
-        kafkaTemplate.send("user-welcome-topic", message);
-    }
+public interface KafkaProducerService {
 
-    public void sendImageUploadNotification(MailMessageDto message) {
-        kafkaTemplate.send("image-upload-topic", message);
-    }
+    void sendWelcomeEmail(String email, String username);
 
-    public void sendImageDownloadNotification(MailMessageDto message) {
-        kafkaTemplate.send("image-download-topic", message);
-    }
+    void sendImageUploadNotification(String email, String username, String totalSize);
+
+    void sendImageDownloadNotification(String email, String fileName, String fileSize);
 }

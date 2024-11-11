@@ -29,4 +29,8 @@ logging:
   level:
     org.flywaydb: DEBUG
     org.springframework.security.oauth2.client: DEBUG
-
+kafka:
+  topics:
+    userWelcome: "user-welcome-topic"
+    imageUpload: "image-upload-topic"
+    imageDownload: "user-download-topic"

@@ -64,12 +64,9 @@ public class ImageServiceImpl implements ImageService {
                 .map(CompletableFuture::join)
                 .toList();
 
-        MailMessageDto message = new MailMessageDto();
-        message.setEmail(user.getEmail());
-        message.setUsername(user.getUsername());
-        message.setTotalSize(FileUtils.byteCountToDisplaySize(totalSize));
-
-        kafkaProducerService.sendImageUploadNotification(message);
+        kafkaProducerService.sendImageUploadNotification(user.getEmail(),
+                user.getUsername(),
+                FileUtils.byteCountToDisplaySize(totalSize));
 
         return responses;
     }
@@ -88,12 +85,10 @@ public class ImageServiceImpl implements ImageService {
             throw new SecurityException("Доступ запрещен: изображение принадлежит другому пользователю.");
         }
 
-        MailMessageDto message = new MailMessageDto();
-        message.setEmail(user.getEmail());
-        message.setFilename(image.getFileName());
-        message.setFileSize(FileUtils.byteCountToDisplaySize(image.getSize()));
-
-        kafkaProducerService.sendImageDownloadNotification(message);
+        kafkaProducerService.sendImageDownloadNotification(
+                user.getEmail(),
+                image.getFileName(),
+                FileUtils.byteCountToDisplaySize(image.getSize()));
 
         return imageMapper.toDto(image);
     }

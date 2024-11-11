@@ -16,3 +16,8 @@ spring:
           auth: true
           starttls:
             enable: true
+kafka:
+  topics:
+    userWelcome: "user-welcome-topic"
+    imageUpload: "image-upload-topic"
+    imageDownload: "user-download-topic"

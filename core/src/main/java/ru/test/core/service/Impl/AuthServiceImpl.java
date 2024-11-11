@@ -59,11 +59,8 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
         logger.info("User registered successfully: {}", savedUser.getUsername());
 
-        MailMessageDto message = new MailMessageDto();
-        message.setEmail(savedUser.getEmail());
-        message.setUsername(savedUser.getUsername());
 
-        kafkaProducerService.sendWelcomeEmail(message);
+        kafkaProducerService.sendWelcomeEmail(user.getEmail(), user.getUsername());
 
         String token = jwtService.generateToken(savedUser);
         return new JwtAuthenticationResponse(token);
