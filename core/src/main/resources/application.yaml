@@ -1,9 +1,12 @@
+# core/src/main/resources/application.yaml
 spring:
+  application:
+    name: core-service
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://postgres:5432/postgres
     username: postgres
     password: 123
     driver-class-name: org.postgresql.Driver
@@ -29,8 +32,9 @@ logging:
   level:
     org.flywaydb: DEBUG
     org.springframework.security.oauth2.client: DEBUG
+
 kafka:
   topics:
     userWelcome: "user-welcome-topic"
     imageUpload: "image-upload-topic"
-    imageDownload: "user-download-topic"
+    imageDownload: "image-download-topic"

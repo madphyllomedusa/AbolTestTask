@@ -2,22 +2,26 @@ server:
   port: 8081
 
 spring:
+  application:
+    name: mail-service
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: phyllomedusatestmailsend@gmail.com
-    password: upws xuvl tzid liwe
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
 kafka:
   topics:
     userWelcome: "user-welcome-topic"
     imageUpload: "image-upload-topic"
-    imageDownload: "user-download-topic"
+    imageDownload: "image-download-topic"
+
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: phyllomedusatestmailsend@gmail.com
+  password: upws xuvl tzid liwe
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
