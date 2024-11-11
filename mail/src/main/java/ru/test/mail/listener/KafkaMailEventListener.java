@@ -11,15 +11,14 @@ import ru.test.mail.service.MailService;
 public class KafkaMailEventListener {
     private final MailService mailService;
 
-
-    @KafkaListener(topics = "user-welcome-topic", groupId = "mail-service")
+    @KafkaListener(topics = "user-welcome-topic", containerFactory = "kafkaListenerContainerFactory")
     public void handleUserRegistration(MailMessageDto message) {
         mailService.sendWelcomeEmail(
                 message.getEmail(),
                 message.getUsername());
     }
 
-    @KafkaListener(topics = "image-upload-topic", groupId = "mail-service")
+    @KafkaListener(topics = "image-upload-topic", containerFactory = "kafkaListenerContainerFactory")
     public void handleImageUpload(MailMessageDto message) {
         mailService.sendImageUploadNotification(
                 message.getEmail(),
@@ -27,7 +26,7 @@ public class KafkaMailEventListener {
                 message.getTotalSize());
     }
 
-    @KafkaListener(topics = "image-download-topic", groupId = "mail-service")
+    @KafkaListener(topics = "image-download-topic", containerFactory = "kafkaListenerContainerFactory")
     public void handleImageDownload(MailMessageDto message) {
         mailService.sendImageDownloadNotification(
                 message.getEmail(),
